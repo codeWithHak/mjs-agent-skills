@@ -125,10 +125,10 @@ if __name__ == "__main__":
 | Layer | Content | Budget | When Loaded |
 |-------|---------|--------|-------------|
 | 1. Metadata | name + description | ~100 tokens | Always (startup) |
-| 2. Instructions | SKILL.md body | ≤300 tokens (500 max) | When skill activates |
+| 2. Instructions | SKILL.md body | <5000 tokens | When skill activates |
 | 3. Resources | scripts/, references/ | As needed | On demand only |
 
-- SKILL.md: <500 lines total
+- SKILL.md: <500 lines, <5000 tokens
 - verify.py output: <100 characters
 - References: one level deep only
 
@@ -167,9 +167,9 @@ head -20 .claude/skills/[skill-name]/SKILL.md
 python .claude/skills/[skill-name]/scripts/verify.py
 # Must exit 0 or 1 with message
 
-# 5. Check token count (rough)
-wc -w .claude/skills/[skill-name]/SKILL.md
-# Should be <400 words (~300 tokens)
+# 5. Check line count
+wc -l .claude/skills/[skill-name]/SKILL.md
+# Should be <500 lines
 ```
 
 ### Routing Evaluation

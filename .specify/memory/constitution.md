@@ -75,18 +75,18 @@ Context window is a shared resource. Follow progressive disclosure (per Agent Sk
 | Layer | Content | Token Budget | When Loaded |
 |-------|---------|--------------|-------------|
 | 1. Metadata | `name` + `description` | ~100 tokens | Always (startup) |
-| 2. Instructions | SKILL.md body | <5000 tokens (prefer ≤300) | When skill activates |
+| 2. Instructions | SKILL.md body | <5000 tokens | When skill activates |
 | 3. Resources | scripts/, references/, assets/ | As needed | On demand only |
 
 **Project-specific budgets**:
 | Component | Budget | Enforcement |
 |-----------|--------|-------------|
-| SKILL.md body | ≤300 tokens (500 max) | Required |
+| SKILL.md body | <5000 tokens | Recommended |
 | SKILL.md lines | <500 lines | Required |
 | verify.py output | <100 characters | Required |
 | Reference depth | One level only | Required |
 
-**Rationale**: Every token consumed by skill definitions leaves less room for actual work. 80-98% token reduction is achievable by executing scripts rather than loading them.
+**Rationale**: Keep SKILL.md concise but complete. Move detailed reference material to separate files. Scripts execute without consuming context tokens.
 
 ### V. Verification Required
 
