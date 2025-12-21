@@ -325,3 +325,10 @@ mjs-skills/
 2. Judgment > procedure
 3. Verification > assumption
 4. Delete > accumulate
+
+## Active Technologies
+- Bash 4+ for hooks, Python 3.8+ for setup/verify/analysis + jq (JSON parsing in bash), Python standard library only (001-skill-tracker)
+- JSONL files in `.claude/activity-logs/` (prompts.jsonl, skill-usage.jsonl) (001-skill-tracker)
+
+## Recent Changes
+- 001-skill-tracker: Added Bash 4+ for hooks, Python 3.8+ for setup/verify/analysis + jq (JSON parsing in bash), Python standard library only
