@@ -202,9 +202,9 @@ Keep references one level deep. Avoid deeply nested reference chains.
    - Name uses gerund form and matches directory
    - Description includes "Use when" trigger
 
-3. **Token check**:
-   - SKILL.md body ≤500 tokens (~400 words)
-   - SKILL.md <500 lines total
+3. **Size check**:
+   - SKILL.md <500 lines
+   - SKILL.md body <5000 tokens
    - verify.py output <100 characters
 
 4. **verify.py test**:

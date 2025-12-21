@@ -5,7 +5,7 @@
 | Layer | Content | Budget | When Loaded |
 |-------|---------|--------|-------------|
 | Metadata | name + description | ~100 tokens | Always |
-| Instructions | SKILL.md body | ≤300 tokens | When activated |
+| Instructions | SKILL.md body | <5000 tokens | When activated |
 | Resources | scripts/, references/ | As needed | On demand |
 
 ## Workflow Patterns
