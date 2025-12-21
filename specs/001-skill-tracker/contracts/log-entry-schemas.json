@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Tracker Log Entry Schemas",
+  "description": "JSON Schema definitions for JSONL log entries",
+
+  "definitions": {
+    "PromptLogEntry": {
+      "type": "object",
+      "description": "Entry in prompts.jsonl",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "examples": ["2025-12-21T10:00:00Z"]
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Claude Code session identifier"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full prompt text submitted by user"
+        }
+      },
+      "required": ["timestamp", "session_id", "prompt"],
+      "additionalProperties": false
+    },
+
+    "SkillStartEvent": {
+      "type": "object",
+      "description": "Skill activation event in skill-usage.jsonl",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "skill": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+          "description": "Skill name (matches directory name)",
+          "examples": ["deploying-kafka-k8s", "installing-skill-tracker"]
+        },
+        "event": {
+          "type": "string",
+          "const": "start"
+        }
+      },
+      "required": ["timestamp", "session_id", "skill", "event"],
+      "additionalProperties": false
+    },
+
+    "SkillVerifyEvent": {
+      "type": "object",
+      "description": "Skill verification event in skill-usage.jsonl",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "skill": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+        },
+        "event": {
+          "type": "string",
+          "const": "verify"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "failure"],
+          "description": "Verification result based on exit code"
+        }
+      },
+      "required": ["timestamp", "session_id", "skill", "event", "status"],
+      "additionalProperties": false
+    },
+
+    "SkillUsageEvent": {
+      "oneOf": [
+        { "$ref": "#/definitions/SkillStartEvent" },
+        { "$ref": "#/definitions/SkillVerifyEvent" }
+      ],
+      "description": "Any event in skill-usage.jsonl"
+    }
+  }
+}

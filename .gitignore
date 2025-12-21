@@ -1,0 +1,4 @@
+.DS_Store
+
+# Skill tracker activity logs (local only)
+.claude/activity-logs/

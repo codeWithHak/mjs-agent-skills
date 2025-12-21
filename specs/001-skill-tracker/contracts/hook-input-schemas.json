@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Code Hook Input Schemas",
+  "description": "JSON Schema definitions for hook input payloads",
+
+  "definitions": {
+    "UserPromptSubmitInput": {
+      "type": "object",
+      "description": "Input for UserPromptSubmit hook",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "The user's prompt text"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Claude Code session identifier"
+        }
+      },
+      "required": ["prompt", "session_id"]
+    },
+
+    "PreToolUseInput": {
+      "type": "object",
+      "description": "Input for PreToolUse hook",
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "description": "Name of the tool being invoked (e.g., 'Bash', 'Read')"
+        },
+        "tool_input": {
+          "type": "object",
+          "description": "Tool-specific input parameters",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "For Bash tool: the command being executed"
+            },
+            "file_path": {
+              "type": "string",
+              "description": "For Read tool: the file path being read"
+            },
+            "path": {
+              "type": "string",
+              "description": "Alternative path field (View tool)"
+            }
+          }
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Claude Code session identifier"
+        }
+      },
+      "required": ["tool_input", "session_id"]
+    },
+
+    "PostToolUseInput": {
+      "type": "object",
+      "description": "Input for PostToolUse hook",
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "description": "Name of the tool that was invoked"
+        },
+        "tool_input": {
+          "type": "object",
+          "description": "Tool-specific input parameters (same as PreToolUse)"
+        },
+        "tool_response": {
+          "type": "object",
+          "description": "Tool execution result",
+          "properties": {
+            "exit_code": {
+              "type": "integer",
+              "description": "Exit code (0 for success)"
+            },
+            "exitCode": {
+              "type": "integer",
+              "description": "Alternative exit code field"
+            },
+            "code": {
+              "type": "integer",
+              "description": "Alternative code field"
+            },
+            "stdout": {
+              "type": "string",
+              "description": "Standard output"
+            },
+            "stderr": {
+              "type": "string",
+              "description": "Standard error"
+            }
+          }
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Claude Code session identifier"
+        }
+      },
+      "required": ["tool_input", "session_id"]
+    }
+  }
+}
