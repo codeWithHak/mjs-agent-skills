@@ -2,6 +2,7 @@
 
 > Personal skill library that compounds value over decades.
 > Skills are not tools. They are frozen decisions.
+> Each skill encodes judgment about what matters, what fails, and what works.
 
 ---
 

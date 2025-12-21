@@ -1,37 +1,220 @@
 # Claude Code Rules
 
-This file is generated during init for the selected agent.
+> Operational directives for AI agents working in mjs-skills
 
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+---
 
-## Task context
+## What This Repo Is
+
+A personal Agent Skills library. Skills are frozen decisions—not tools, not utilities, not helpers. Each skill encodes judgment about what matters, what fails, and what works.
+
+---
+
+## Before You Do Anything
+
+1. **Read the constitution**: `.specify/memory/constitution.md`
+2. **Check existing skills**: `ls .claude/skills/`
+3. **Understand the PRD**: `research/h3-skills-master-prd.md` for skill specifications
+4. **Reference the spec**: `agentskills-standard/docs/specification.mdx` for Agent Skills format
+
+---
+
+## Task Context
 
 **Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.
 
 **Your Success is Measured By:**
-- All outputs strictly follow the user intent.
-- Prompt History Records (PHRs) are created automatically and accurately for every user prompt.
-- Architectural Decision Record (ADR) suggestions are made intelligently for significant decisions.
-- All changes are small, testable, and reference code precisely.
+- All outputs strictly follow the user intent
+- Skills comply with constitution principles and Agent Skills spec
+- Prompt History Records (PHRs) created automatically and accurately
+- ADR suggestions made intelligently for significant decisions
+- All changes are small, testable, and reference code precisely
+
+---
 
 ## Core Guarantees (Product Promise)
 
-- Record every user input verbatim in a Prompt History Record (PHR) after every user message. Do not truncate; preserve full multiline input.
+- Record every user input verbatim in a PHR after every user message
 - PHR routing (all under `history/prompts/`):
   - Constitution → `history/prompts/constitution/`
   - Feature-specific → `history/prompts/<feature-name>/`
   - General → `history/prompts/general/`
-- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto‑create ADRs; require user consent.
+- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto-create ADRs; require user consent.
+
+---
+
+## Skill Development Rules
+
+### Authoritative Standard
+
+Follow the [Agent Skills Specification](agentskills-standard/docs/specification.mdx). When in doubt, the spec takes precedence. The constitution at `.specify/memory/constitution.md` adds project-specific constraints.
+
+### Required Structure
+
+```
+.claude/skills/[skill-name]/
+├── SKILL.md           # YAML frontmatter + instructions
+└── scripts/
+    └── verify.py      # Exit 0 (success) or 1 (failure)
+```
+
+### SKILL.md Template
+
+```yaml
+---
+name: [gerund-form-name]
+description: |
+  [What it does in one sentence].
+  Use when [specific trigger condition].
+---
+
+## Quick Start
+[Immediate action for the 80% case]
+
+## Instructions
+1. [Step with command]
+2. [Step with command]
+3. `python scripts/verify.py`
+
+## If Verification Fails
+1. Run diagnostic: `[specific command]`
+2. Check: `[what to look for]`
+3. **Stop and report** — do not proceed with downstream steps
+```
+
+### verify.py Template
+
+```python
+#!/usr/bin/env python3
+"""Verify [what this checks]."""
+import subprocess
+import sys
+
+def main():
+    result = subprocess.run([...], capture_output=True)
+
+    if result.returncode == 0:
+        print("✓ [Specific success message]")  # Keep under 100 chars
+        sys.exit(0)
+    else:
+        print("✗ [Actionable error]. Run: [diagnostic command]")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Rules You Must Follow
+
+#### Naming
+- Use gerund form: `deploying-*`, `scaffolding-*`, `building-*`
+- Max 64 characters, lowercase + hyphens only
+- Exception: Pattern names can override if sharper (e.g., `kafka-exactly-once`)
+- Test: Would someone search for this exact name?
+- **BANNED**: `utils`, `helpers`, `setup`, `manage`, `handle`
+
+#### Description
+- MUST include "Use when [trigger]"
+- Max 1024 characters (per Agent Skills spec)
+- Use third person ("Deploys..." not "I deploy...")
+- If collision possible, add "NOT when [exclusion]"
+- **BANNED words**: "manage", "handle", "setup", "utilities", "helpers"
+
+#### Token Discipline (Progressive Disclosure)
+
+| Layer | Content | Budget | When Loaded |
+|-------|---------|--------|-------------|
+| 1. Metadata | name + description | ~100 tokens | Always (startup) |
+| 2. Instructions | SKILL.md body | ≤300 tokens (500 max) | When skill activates |
+| 3. Resources | scripts/, references/ | As needed | On demand only |
+
+- SKILL.md: <500 lines total
+- verify.py output: <100 characters
+- References: one level deep only
+
+#### MCP Output Discipline
+- NEVER inject raw MCP output into context
+- ALWAYS filter/summarize before context entry
+- Raw payloads stay in subprocess or temp files
+- **BANNED patterns**: `print(full_response)`, `context += mcp_output`, `return transcript`
+
+#### Verification
+- Every skill MUST have verify.py
+- On failure: exit 1 + actionable error + diagnostic command
+- On success: exit 0 + minimal confirmation
+
+#### Failure Escalation
+- If verify.py fails twice: STOP
+- Surface the diagnostic command
+- Request human intervention
+- Do NOT proceed with downstream steps
+
+### Before Shipping Any Skill
+
+```bash
+# 1. Validate with skills-ref
+skills-ref validate ./.claude/skills/[skill-name]
+
+# 2. Structure check
+ls .claude/skills/[skill-name]/SKILL.md
+ls .claude/skills/[skill-name]/scripts/verify.py
+
+# 3. Check frontmatter
+head -20 .claude/skills/[skill-name]/SKILL.md
+# Must have: name, description with "Use when"
+
+# 4. Test verify.py
+python .claude/skills/[skill-name]/scripts/verify.py
+# Must exit 0 or 1 with message
+
+# 5. Check token count (rough)
+wc -w .claude/skills/[skill-name]/SKILL.md
+# Should be <400 words (~300 tokens)
+```
+
+### Routing Evaluation
+
+Before declaring a skill complete, test routing:
+
+| Test | How | Pass Condition |
+|------|-----|----------------|
+| Positive | Submit natural language query that should trigger skill | Skill activates |
+| Negative | Submit related but different query | Skill does NOT activate |
+| Collision | Submit ambiguous query | Only ONE skill activates |
+
+### Skill Commit Messages
+
+Format: `Claude: [action] using [skill-name] skill`
+
+Examples:
+- `Claude: deployed kafka using deploying-kafka-k8s skill`
+- `Claude: scaffolded triage-service using scaffolding-fastapi-dapr skill`
+
+### Modifying Existing Skills
+
+1. Check if change is backward-compatible
+2. If breaking change → create new skill with `-v2` suffix
+3. Update any skills that depend on this one
+4. Re-run routing evals
+5. Re-validate with `skills-ref validate`
+
+### The Ultimate Test
+
+> **Would you recreate this skill if it were deleted?**
+
+If the answer is no, the skill has no value. Do not ship it.
+
+---
 
 ## Development Guidelines
 
-### 1. Authoritative Source Mandate:
-Agents MUST prioritize and use MCP tools and CLI commands for all information gathering and task execution. NEVER assume a solution from internal knowledge; all methods require external verification.
+### 1. Authoritative Source Mandate
+Agents MUST prioritize MCP tools and CLI commands for all information gathering. NEVER assume a solution from internal knowledge; all methods require external verification.
 
-### 2. Execution Flow:
-Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions (running commands and capturing outputs) over manual file creation or reliance on internal knowledge.
+### 2. Execution Flow
+Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions over manual file creation.
 
-### 3. Knowledge capture (PHR) for Every User Input.
+### 3. Knowledge Capture (PHR)
 After completing requests, you **MUST** create a PHR (Prompt History Record).
 
 **When to create PHRs:**
@@ -40,171 +223,105 @@ After completing requests, you **MUST** create a PHR (Prompt History Record).
 - Debugging sessions
 - Spec/task/plan creation
 - Multi-step workflows
+- Skill creation or modification
 
 **PHR Creation Process:**
 
-1) Detect stage
-   - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
+1) Detect stage: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
 
-2) Generate title
-   - 3–7 words; create a slug for the filename.
+2) Generate title: 3–7 words; create a slug for the filename
 
-2a) Resolve route (all under history/prompts/)
-  - `constitution` → `history/prompts/constitution/`
-  - Feature stages (spec, plan, tasks, red, green, refactor, explainer, misc) → `history/prompts/<feature-name>/` (requires feature context)
-  - `general` → `history/prompts/general/`
+3) Resolve route (all under history/prompts/):
+   - `constitution` → `history/prompts/constitution/`
+   - Feature stages → `history/prompts/<feature-name>/`
+   - `general` → `history/prompts/general/`
 
-3) Prefer agent‑native flow (no shell)
-   - Read the PHR template from one of:
-     - `.specify/templates/phr-template.prompt.md`
-     - `templates/phr-template.prompt.md`
-   - Allocate an ID (increment; on collision, increment again).
-   - Compute output path based on stage:
-     - Constitution → `history/prompts/constitution/<ID>-<slug>.constitution.prompt.md`
-     - Feature → `history/prompts/<feature-name>/<ID>-<slug>.<stage>.prompt.md`
-     - General → `history/prompts/general/<ID>-<slug>.general.prompt.md`
-   - Fill ALL placeholders in YAML and body:
-     - ID, TITLE, STAGE, DATE_ISO (YYYY‑MM‑DD), SURFACE="agent"
-     - MODEL (best known), FEATURE (or "none"), BRANCH, USER
-     - COMMAND (current command), LABELS (["topic1","topic2",...])
-     - LINKS: SPEC/TICKET/ADR/PR (URLs or "null")
-     - FILES_YAML: list created/modified files (one per line, " - ")
-     - TESTS_YAML: list tests run/added (one per line, " - ")
-     - PROMPT_TEXT: full user input (verbatim, not truncated)
-     - RESPONSE_TEXT: key assistant output (concise but representative)
-     - Any OUTCOME/EVALUATION fields required by the template
-   - Write the completed file with agent file tools (WriteFile/Edit).
-   - Confirm absolute path in output.
+4) Create PHR using shell script:
+   ```bash
+   .specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json
+   ```
 
-4) Use sp.phr command file if present
-   - If `.**/commands/sp.phr.*` exists, follow its structure.
-   - If it references shell but Shell is unavailable, still perform step 3 with agent‑native tools.
+5) Fill all placeholders in created file
 
-5) Shell fallback (only if step 3 is unavailable or fails, and Shell is permitted)
-   - Run: `.specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json`
-   - Then open/patch the created file to ensure all placeholders are filled and prompt/response are embedded.
+6) Post-creation validations:
+   - No unresolved placeholders
+   - PROMPT_TEXT is complete (not truncated)
+   - File exists at expected path
 
-6) Routing (automatic, all under history/prompts/)
-   - Constitution → `history/prompts/constitution/`
-   - Feature stages → `history/prompts/<feature-name>/` (auto-detected from branch or explicit feature context)
-   - General → `history/prompts/general/`
-
-7) Post‑creation validations (must pass)
-   - No unresolved placeholders (e.g., `{{THIS}}`, `[THAT]`).
-   - Title, stage, and dates match front‑matter.
-   - PROMPT_TEXT is complete (not truncated).
-   - File exists at the expected path and is readable.
-   - Path matches route.
-
-8) Report
-   - Print: ID, path, stage, title.
-   - On any failure: warn but do not block the main command.
-   - Skip PHR only for `/sp.phr` itself.
-
-### 4. Explicit ADR suggestions
-- When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
-
-### 5. Human as Tool Strategy
-You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
-
-**Invocation Triggers:**
-1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
-2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
-3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
-
-## Default policies (must follow)
-- Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
-- Do not invent APIs, data, or contracts; ask targeted clarifiers if missing.
-- Never hardcode secrets or tokens; use `.env` and docs.
-- Prefer the smallest viable diff; do not refactor unrelated code.
-- Cite existing code with code references (start:end:path); propose new code in fenced blocks.
-- Keep reasoning private; output only decisions, artifacts, and justifications.
-
-### Execution contract for every request
-1) Confirm surface and success criteria (one sentence).
-2) List constraints, invariants, non‑goals.
-3) Produce the artifact with acceptance checks inlined (checkboxes or tests where applicable).
-4) Add follow‑ups and risks (max 3 bullets).
-5) Create PHR in appropriate subdirectory under `history/prompts/` (constitution, feature-name, or general).
-6) If plan/tasks identified decisions that meet significance, surface ADR suggestion text as described above.
-
-### Minimum acceptance criteria
-- Clear, testable acceptance criteria included
-- Explicit error paths and constraints stated
-- Smallest viable change; no unrelated edits
-- Code references to modified/inspected files where relevant
-
-## Architect Guidelines (for planning)
-
-Instructions: As an expert architect, generate a detailed architectural plan for [Project Name]. Address each of the following thoroughly.
-
-1. Scope and Dependencies:
-   - In Scope: boundaries and key features.
-   - Out of Scope: explicitly excluded items.
-   - External Dependencies: systems/services/teams and ownership.
-
-2. Key Decisions and Rationale:
-   - Options Considered, Trade-offs, Rationale.
-   - Principles: measurable, reversible where possible, smallest viable change.
-
-3. Interfaces and API Contracts:
-   - Public APIs: Inputs, Outputs, Errors.
-   - Versioning Strategy.
-   - Idempotency, Timeouts, Retries.
-   - Error Taxonomy with status codes.
-
-4. Non-Functional Requirements (NFRs) and Budgets:
-   - Performance: p95 latency, throughput, resource caps.
-   - Reliability: SLOs, error budgets, degradation strategy.
-   - Security: AuthN/AuthZ, data handling, secrets, auditing.
-   - Cost: unit economics.
-
-5. Data Management and Migration:
-   - Source of Truth, Schema Evolution, Migration and Rollback, Data Retention.
-
-6. Operational Readiness:
-   - Observability: logs, metrics, traces.
-   - Alerting: thresholds and on-call owners.
-   - Runbooks for common tasks.
-   - Deployment and Rollback strategies.
-   - Feature Flags and compatibility.
-
-7. Risk Analysis and Mitigation:
-   - Top 3 Risks, blast radius, kill switches/guardrails.
-
-8. Evaluation and Validation:
-   - Definition of Done (tests, scans).
-   - Output Validation for format/requirements/safety.
-
-9. Architectural Decision Record (ADR):
-   - For each significant decision, create an ADR and link it.
-
-### Architecture Decision Records (ADR) - Intelligent Suggestion
-
-After design/architecture work, test for ADR significance:
-
-- Impact: long-term consequences? (e.g., framework, data model, API, security, platform)
+### 4. ADR Suggestions
+When significant architectural decisions are made, run the three-part test:
+- Impact: long-term consequences?
 - Alternatives: multiple viable options considered?
-- Scope: cross‑cutting and influences system design?
+- Scope: cross-cutting and influences system design?
 
 If ALL true, suggest:
-📋 Architectural decision detected: [brief-description]
-   Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
+> 📋 Architectural decision detected: [brief-description]
+> Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
 
-Wait for consent; never auto-create ADRs. Group related decisions (stacks, authentication, deployment) into one ADR when appropriate.
+Wait for consent; never auto-create ADRs.
 
-## Basic Project Structure
+### 5. Human as Tool Strategy
+You MUST invoke the user for input when you encounter:
+1. **Ambiguous Requirements**: Ask 2-3 targeted clarifying questions
+2. **Unforeseen Dependencies**: Surface them and ask for prioritization
+3. **Architectural Uncertainty**: Present options and get user's preference
+4. **Completion Checkpoint**: Summarize and confirm next steps
 
-- `.specify/memory/constitution.md` — Project principles
-- `specs/<feature>/spec.md` — Feature requirements
-- `specs/<feature>/plan.md` — Architecture decisions
-- `specs/<feature>/tasks.md` — Testable tasks with cases
-- `history/prompts/` — Prompt History Records
-- `history/adr/` — Architecture Decision Records
-- `.specify/` — SpecKit Plus templates and scripts
+---
 
-## Code Standards
-See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+## Default Policies
+
+- Clarify and plan first
+- Do not invent APIs, data, or contracts
+- Never hardcode secrets or tokens; use `.env`
+- Prefer the smallest viable diff
+- Cite existing code with references (start:end:path)
+- Keep reasoning private; output only decisions and justifications
+
+### Execution Contract
+
+1) Confirm surface and success criteria (one sentence)
+2) List constraints, invariants, non-goals
+3) Produce artifact with acceptance checks inlined
+4) Add follow-ups and risks (max 3 bullets)
+5) Create PHR in appropriate subdirectory
+6) Surface ADR suggestion if decisions meet significance threshold
+
+---
+
+## Project Structure
+
+```
+mjs-skills/
+├── .claude/skills/              # Agent Skills (22 planned)
+├── .specify/
+│   ├── memory/constitution.md   # Project principles
+│   ├── templates/               # Spec/plan/task templates
+│   └── scripts/                 # PHR, ADR creation scripts
+├── agentskills-standard/        # Agent Skills specification
+├── specs/<feature>/             # Feature specs, plans, tasks
+├── history/
+│   ├── prompts/                 # PHRs by stage
+│   └── adr/                     # Architecture Decision Records
+└── research/                    # Design docs and PRDs
+```
+
+---
+
+## Research Documents
+
+| Document | Purpose |
+|----------|---------|
+| `research/skill-design-reference.md` | Design principles |
+| `research/h3-skills-master-prd.md` | Skill specifications (22 skills) |
+| `research/skills-evaluation-prd.md` | Measurement system |
+| `agentskills-standard/docs/specification.mdx` | Agent Skills format spec |
+
+---
+
+## When in Doubt
+
+1. Simpler is better
+2. Judgment > procedure
+3. Verification > assumption
+4. Delete > accumulate
