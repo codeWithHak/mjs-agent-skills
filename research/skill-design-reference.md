@@ -228,7 +228,7 @@ description: Deploys Apache Kafka on Kubernetes using Helm. Use when setting up 
 ```
 
 **Critical rules**:
-- Keep under 300 tokens preferred (500 tokens max)
+- Keep under 500 lines, <5000 tokens (per Agent Skills spec)
 - References one level deep only
 - No time-sensitive information
 - Consistent terminology throughout
