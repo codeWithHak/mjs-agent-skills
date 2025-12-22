@@ -1,6 +1,6 @@
 # MJS Skills Library
 
-> 22 agent skills encoding frozen decisions for software engineering workflows.
+> 23 agent skills encoding frozen decisions for software engineering workflows.
 
 ## What Are Skills?
 
@@ -52,13 +52,14 @@ Chat interfaces and styling.
 | `building-chat-widgets` | "chat widget", "embeddable chat" | Widget architecture |
 | `streaming-llm-responses` | "stream response", "SSE", "real-time" | Token streaming |
 
-### Development Practices (2)
-Debugging, SRE, and production operations.
+### Development Practices (3)
+Debugging, SRE, production operations, and agent orchestration.
 
 | Skill | Trigger | Key Value |
 |-------|---------|-----------|
 | `systematic-debugging` | "bug", "test failure", "unexpected behavior" | 4-phase methodology, 3+ failures = question architecture |
 | `operating-production-services` | "SLO", "postmortem", "error budget", "incident" | SLO alerting, blameless postmortems, burn rates |
+| `orchestrating-subagents` | "parallel tasks", "dispatch agents", "multi-task plan" | When to parallelize, prompt structure, fan-out/fan-in |
 
 ### Documents (2)
 Office file manipulation.
