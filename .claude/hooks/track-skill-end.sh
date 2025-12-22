@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Track skill verification results
-echo '{"async":true,"asyncTimeout":15000}'
+# Track skill verification results (sync - fast operation)
 
 # Read JSON input from stdin
 INPUT=$(cat)

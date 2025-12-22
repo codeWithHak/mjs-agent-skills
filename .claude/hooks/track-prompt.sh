@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Track user prompt submissions
-echo '{"async":true,"asyncTimeout":15000}'
+# Track user prompt submissions (sync - fast operation)
 
 # Read JSON input from stdin
 INPUT=$(cat)

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Track skill activations via SKILL.md reads
-echo '{"async":true,"asyncTimeout":15000}'
+# Track skill activations via SKILL.md reads (sync - fast operation)
 
 # Read JSON input from stdin
 INPUT=$(cat)
