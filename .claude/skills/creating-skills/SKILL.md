@@ -174,20 +174,35 @@ Write the YAML frontmatter with `name` and `description`:
 
 - `name`: The skill name (gerund form preferred: `deploying-*`, `creating-*`, `fetching-*`)
 - `description`: This is the primary triggering mechanism for your skill
-  - Include both what the Skill does and specific triggers/contexts for when to use it
-  - Include all "when to use" information here - the body is only loaded after triggering
-  - Add "NOT when [exclusion]" if collision with other skills is possible
 
-Example:
+**CRITICAL: Description = When to Use, NOT What It Does**
+
+The description should ONLY describe triggering conditions. Do NOT summarize the skill's process or workflow in the description.
+
+**Why this matters:** When a description summarizes the skill's workflow, Claude may follow the description instead of reading the full skill content. A description saying "dispatches subagent per task with code review" caused Claude to do ONE review, even though the skill body specified TWO reviews. When changed to just triggering conditions, Claude correctly read and followed the full skill.
+
 ```yaml
----
-name: creating-documents
+# BAD: Summarizes workflow - Claude may follow this instead of reading skill
+description: Use when executing plans - dispatches subagent per task with code review
+
+# BAD: Too much process detail
+description: Use for TDD - write test first, watch it fail, write minimal code
+
+# GOOD: Just triggering conditions
+description: Use when executing implementation plans with independent tasks
+
+# GOOD: Triggering conditions with exclusion
 description: |
-  Creates and edits professional documents (.docx files).
-  Use when users need to create new documents, modify content, or work with tracked changes.
-  NOT when converting between formats (use converting-documents skill instead).
----
+  Use when users need to create new documents or work with tracked changes.
+  NOT when converting between formats (use converting-documents skill).
 ```
+
+**Description checklist:**
+- Start with "Use when..." to focus on triggering conditions
+- Include symptoms, situations, contexts that signal the skill applies
+- Add "NOT when [exclusion]" if collision with other skills possible
+- NEVER summarize the skill's process or workflow
+- Max 1024 characters
 
 #### Body
 

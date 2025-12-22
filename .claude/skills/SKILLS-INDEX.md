@@ -1,6 +1,6 @@
 # MJS Skills Library
 
-> 20 agent skills encoding frozen decisions for software engineering workflows.
+> 21 agent skills encoding frozen decisions for software engineering workflows.
 
 ## What Are Skills?
 
@@ -51,6 +51,13 @@ Chat interfaces and styling.
 | `building-chat-interfaces` | "chat UI", "message list", "AI chat" | Streaming, markdown |
 | `building-chat-widgets` | "chat widget", "embeddable chat" | Widget architecture |
 | `streaming-llm-responses` | "stream response", "SSE", "real-time" | Token streaming |
+
+### Development Practices (1)
+Debugging and development methodology.
+
+| Skill | Trigger | Key Value |
+|-------|---------|-----------|
+| `systematic-debugging` | "bug", "test failure", "unexpected behavior" | 4-phase methodology, 3+ failures = question architecture |
 
 ### Documents (2)
 Office file manipulation.
