@@ -102,8 +102,8 @@ if [ -n "${LIBRARY_NAME:-}" ] && [ -z "$LIBRARY_ID" ]; then
     RESOLVE_TEXT=$(echo "$RESOLVE_JSON" | python3 -c 'import sys, json; data=json.load(sys.stdin); print(data.get("content", [{}])[0].get("text", ""))')
   fi
 
-  # Extract first library ID using grep
-  LIBRARY_ID=$(echo "$RESOLVE_TEXT" | grep -oP 'Context7-compatible library ID:\s*\K[/\w.-]+' | head -n 1)
+  # Extract first library ID using sed (portable across Linux/macOS)
+  LIBRARY_ID=$(echo "$RESOLVE_TEXT" | sed -n 's/.*Context7-compatible library ID:[[:space:]]*\([/a-zA-Z0-9._-]*\).*/\1/p' | head -n 1)
 
   [ $VERBOSE -eq 1 ] && echo "✅ Resolved to: $LIBRARY_ID" >&2
 fi

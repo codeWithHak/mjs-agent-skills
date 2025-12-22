@@ -1,14 +1,12 @@
 ---
 name: fetching-library-docs
 description: |
-  Token-efficient library documentation fetcher using Context7 MCP with 77% token savings
-  through shell pipeline filtering. Fetches code examples, API references, and best practices
-  for JavaScript, Python, Go, Rust, and other libraries. Use when users ask about library
-  documentation, need code examples, want API usage patterns, are learning a new framework,
-  need syntax reference, or troubleshooting with library-specific information. Triggers
-  include questions like "Show me React hooks", "How do I use Prisma", "What's the Next.js
-  routing syntax", or any request for library/framework documentation.
-  NOT when documentation is already in local files or cached.
+  Token-efficient library API documentation fetcher using Context7 MCP with 77% token savings.
+  Fetches code examples, API references, and usage patterns for published libraries (React,
+  Next.js, Prisma, etc). Use when users ask "how do I use X library", need code examples,
+  want API syntax, or are learning a framework's official API. Triggers: "Show me React hooks",
+  "Prisma query syntax", "Next.js routing API". NOT for exploring repo internals/source code
+  (use researching-with-deepwiki) or local files.
 ---
 
 # Context7 Efficient Documentation Fetcher

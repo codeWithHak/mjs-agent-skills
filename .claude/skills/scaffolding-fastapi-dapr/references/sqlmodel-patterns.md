@@ -1,13 +1,4 @@
----
-name: modeling-databases
-description: |
-  Design and implement database schemas using SQLModel with sync and async patterns.
-  Use when creating database models for FastAPI, setting up PostgreSQL/Neon connections,
-  defining relationships (one-to-many, many-to-many), or implementing async database operations.
-  NOT when using raw SQLAlchemy without Pydantic validation needs.
----
-
-# SQLModel Database
+# SQLModel Database Patterns
 
 Design and implement database schemas using SQLModel - combining SQLAlchemy's power with Pydantic's validation.
 
@@ -82,48 +73,7 @@ async def get_session() -> AsyncSession:
         yield session
 ```
 
-### 3. FastAPI CRUD Integration
-
-```python
-from fastapi import FastAPI, Depends, HTTPException
-from sqlmodel import select
-
-app = FastAPI()
-
-@app.on_event("startup")
-async def on_startup():
-    await create_db_and_tables()
-
-@app.post("/tasks", response_model=TaskRead, status_code=201)
-async def create_task(task: TaskCreate, session: AsyncSession = Depends(get_session)):
-    db_task = Task.model_validate(task)
-    session.add(db_task)
-    await session.commit()
-    await session.refresh(db_task)
-    return db_task
-
-@app.get("/tasks/{task_id}", response_model=TaskRead)
-async def get_task(task_id: int, session: AsyncSession = Depends(get_session)):
-    task = await session.get(Task, task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
-
-@app.patch("/tasks/{task_id}", response_model=TaskRead)
-async def update_task(task_id: int, task_update: TaskUpdate, session: AsyncSession = Depends(get_session)):
-    task = await session.get(Task, task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    # Key pattern: only update provided fields
-    update_data = task_update.model_dump(exclude_unset=True)
-    task.sqlmodel_update(update_data)
-    session.add(task)
-    await session.commit()
-    await session.refresh(task)
-    return task
-```
-
-### 4. Relationships
+### 3. Relationships
 
 #### One-to-Many
 
@@ -160,7 +110,7 @@ class Task(SQLModel, table=True):
     workers: List[Worker] = Relationship(back_populates="tasks", link_model=TaskWorkerLink)
 ```
 
-### 5. Query Patterns
+### 4. Query Patterns
 
 ```python
 from sqlmodel import select, or_
@@ -187,7 +137,7 @@ from sqlalchemy.orm import selectinload
 statement = select(Task).options(selectinload(Task.project))
 ```
 
-### 6. Neon PostgreSQL Connection
+### 5. Neon PostgreSQL Connection
 
 ```python
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -201,7 +151,69 @@ if DATABASE_URL.startswith("postgresql://"):
 async_engine = create_async_engine(DATABASE_URL, pool_size=5, max_overflow=10)
 ```
 
-### 7. Testing Pattern
+---
+
+## Migrations with Alembic
+
+### Setup
+
+```bash
+uv add alembic
+alembic init migrations
+```
+
+### Configuration
+
+Edit `migrations/env.py`:
+```python
+from sqlmodel import SQLModel
+from app.models import *  # Import all models
+
+target_metadata = SQLModel.metadata
+```
+
+### Commands
+
+```bash
+# Create migration
+alembic revision --autogenerate -m "Add tasks table"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback one step
+alembic downgrade -1
+```
+
+### Common Operations
+
+```python
+# Add column
+op.add_column('task', sa.Column('priority', sa.String(), default='medium'))
+
+# Add index
+op.create_index('ix_task_status', 'task', ['status'])
+
+# Add foreign key
+op.add_column('task', sa.Column('project_id', sa.Integer()))
+op.create_foreign_key('fk_task_project', 'task', 'project', ['project_id'], ['id'])
+```
+
+---
+
+## Critical Patterns
+
+**Always use `await session.exec()` not `session.execute()`** for SQLModel select statements.
+
+```python
+# Correct
+results = await session.exec(select(Task))
+
+# Also correct for getting by ID
+task = await session.get(Task, task_id)
+```
+
+## Testing Pattern
 
 ```python
 import pytest
@@ -216,34 +228,3 @@ def session():
     with Session(engine) as session:
         yield session
 ```
-
----
-
-## Critical: Async Session Patterns
-
-**Always use `await session.exec()` not `session.execute()`** for SQLModel select statements.
-
-```python
-# Correct
-results = await session.exec(select(Task))
-
-# Also correct for getting by ID
-task = await session.get(Task, task_id)
-```
-
----
-
-## Verification
-
-Run: `python3 scripts/verify.py`
-
-Expected: `✓ modeling-databases skill ready`
-
-## If Verification Fails
-
-1. Check: references/migrations.md exists
-2. **Stop and report** if still failing
-
-## References
-
-- [references/migrations.md](references/migrations.md) - Database migration patterns with Alembic

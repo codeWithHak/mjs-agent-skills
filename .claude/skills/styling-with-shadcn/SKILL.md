@@ -305,6 +305,11 @@ Expected: `✓ styling-with-shadcn skill ready`
 1. Check: references/ folder exists with component-examples.md
 2. **Stop and report** if still failing
 
+## Related Skills
+
+- **fetching-library-docs** - Latest shadcn/ui docs: `--library-id /shadcn-ui/ui --topic components`
+- **building-nextjs-apps** - Next.js 16 patterns for app structure
+
 ## References
 
 - [references/component-examples.md](references/component-examples.md) - Full code examples

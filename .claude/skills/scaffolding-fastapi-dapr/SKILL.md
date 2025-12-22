@@ -201,6 +201,74 @@ See [references/dapr-patterns.md](references/dapr-patterns.md) for state managem
 
 ---
 
+## Production Patterns
+
+### Structured Logging
+
+```python
+import structlog
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer()
+    ]
+)
+log = structlog.get_logger()
+log.info("task_created", task_id=task.id, user_id=user["sub"])
+```
+
+### Repository + Service Pattern
+
+```python
+# Repository: data access only
+class TaskRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(self, task: TaskCreate) -> Task:
+        db_task = Task.model_validate(task)
+        self.session.add(db_task)
+        await self.session.commit()
+        return db_task
+
+# Service: business logic
+class TaskService:
+    def __init__(self, repo: TaskRepository):
+        self.repo = repo
+
+    async def create_task(self, task: TaskCreate, user_id: str) -> Task:
+        # Business logic here
+        return await self.repo.create(task)
+
+# Dependency injection
+def get_task_service(session: AsyncSession = Depends(get_session)):
+    return TaskService(TaskRepository(session))
+```
+
+### Async Testing
+
+```python
+@pytest.fixture
+async def client(session):
+    app.dependency_overrides[get_session] = lambda: session
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test"
+    ) as ac:
+        yield ac
+
+@pytest.mark.anyio
+async def test_create_task(client: AsyncClient):
+    response = await client.post("/tasks", json={"title": "Test"})
+    assert response.status_code == 201
+```
+
+See [references/production-testing.md](references/production-testing.md) for full patterns.
+
+---
+
 ## Project Structure
 
 ```
@@ -211,7 +279,12 @@ backend/
 │   ├── database.py       # Async engine + session
 │   ├── models/           # SQLModel schemas
 │   ├── routers/          # API routes
+│   ├── repositories/     # Data access layer
+│   ├── services/         # Business logic
 │   └── dapr/             # Dapr handlers
+├── tests/
+│   ├── conftest.py       # Fixtures
+│   └── test_*.py         # Test files
 ├── components/           # Dapr components (k8s)
 │   ├── pubsub.yaml
 │   └── statestore.yaml
@@ -231,7 +304,14 @@ Expected: `✓ scaffolding-fastapi-dapr skill ready`
 1. Check: references/ folder has both pattern files
 2. **Stop and report** if still failing
 
+## Related Skills
+
+- **configuring-better-auth** - JWT/JWKS auth for API endpoints
+- **fetching-library-docs** - FastAPI docs: `--library-id /fastapi/fastapi --topic dependencies`
+
 ## References
 
 - [references/fastapi-patterns.md](references/fastapi-patterns.md) - Complete FastAPI backend patterns
 - [references/dapr-patterns.md](references/dapr-patterns.md) - Dapr pub/sub, state, and jobs
+- [references/sqlmodel-patterns.md](references/sqlmodel-patterns.md) - SQLModel database patterns and migrations
+- [references/production-testing.md](references/production-testing.md) - Structured logging, DI, testing, versioning

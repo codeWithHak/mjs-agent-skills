@@ -1,15 +1,48 @@
 ---
 name: configuring-better-auth
 description: |
-  Implement OAuth 2.1 / OIDC authentication using Better Auth. Use when setting up a centralized
-  auth server (SSO provider), implementing SSO clients in Next.js apps, configuring PKCE flows,
-  or managing tokens with JWKS verification. Covers both server-side setup and client integration.
+  Implement OAuth 2.1 / OIDC authentication using Better Auth with MCP assistance. Use when setting
+  up a centralized auth server (SSO provider), implementing SSO clients in Next.js apps, configuring
+  PKCE flows, or managing tokens with JWKS verification. Uses Better Auth MCP for guided setup.
   NOT when using simple session-only auth without OAuth/OIDC requirements.
 ---
 
 # Better Auth OAuth/OIDC
 
 Implement centralized authentication with Better Auth - either as an auth server or SSO client.
+
+## MCP Server Setup
+
+Better Auth provides an MCP server powered by Chonkie for guided configuration:
+
+```bash
+claude mcp add --transport http better-auth https://mcp.chonkie.ai/better-auth/better-auth-builder/mcp
+```
+
+Or in `settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "better-auth": {
+      "type": "http",
+      "url": "https://mcp.chonkie.ai/better-auth/better-auth-builder/mcp"
+    }
+  }
+}
+```
+
+### When to Use the MCP
+
+| Task | Use MCP? |
+|------|----------|
+| Initial Better Auth setup | Yes - guided configuration |
+| Adding OIDC provider plugin | Yes - generates correct config |
+| Troubleshooting auth issues | Yes - can analyze setup |
+| Understanding auth flow | Yes - explains concepts |
+| Writing custom middleware | No - use patterns below |
+
+---
 
 ## Architecture Overview
 

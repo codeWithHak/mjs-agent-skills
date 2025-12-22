@@ -248,6 +248,78 @@ lib/
 
 ---
 
+## Next.js DevTools MCP
+
+Use the next-devtools-mcp server for runtime diagnostics and development automation.
+
+### Setup
+
+```bash
+claude mcp add next-devtools npx next-devtools-mcp@latest
+```
+
+Or in `settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "next-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["next-devtools-mcp@latest"]
+    }
+  }
+}
+```
+
+### Available Tools
+
+| Tool | Purpose |
+|------|---------|
+| `init` | Establish context with available tools and best practices |
+| `nextjs_docs` | Search and fetch official Next.js documentation |
+| `browser_eval` | Automate browser testing with Playwright |
+| `nextjs_index` | Discover running Next.js dev servers |
+| `nextjs_call` | Execute MCP tools on running dev servers |
+| `upgrade_nextjs_16` | Automated upgrade with codemods |
+| `enable_cache_components` | Configure Cache Components for Next.js 16 |
+
+### Key Use Cases
+
+**1. Get Real-time Errors**
+
+```
+"What build errors are there in my Next.js app?"
+"Show me TypeScript errors in the current project"
+```
+
+**2. Debug Runtime Issues**
+
+```
+"Check the dev server logs for errors"
+"What runtime errors are happening on the dashboard page?"
+```
+
+**3. Upgrade Assistance**
+
+```
+"Upgrade this project to Next.js 16"
+"Enable cache components for this app"
+```
+
+**4. Documentation Lookup**
+
+```
+"How do I use the Image component in Next.js 16?"
+"What's the correct way to handle dynamic routes?"
+```
+
+### Next.js 16 MCP Endpoint
+
+Next.js 16+ exposes a built-in MCP endpoint at `http://localhost:3000/_next/mcp` (or your dev server port). The devtools MCP automatically discovers and connects to running servers.
+
+---
+
 ## Verification
 
 Run: `python3 scripts/verify.py`
@@ -259,7 +331,14 @@ Expected: `✓ building-nextjs-apps skill ready`
 1. Check: references/ folder has nextjs-16-patterns.md
 2. **Stop and report** if still failing
 
+## Related Skills
+
+- **styling-with-shadcn** - UI components for Next.js apps
+- **fetching-library-docs** - Latest Next.js docs: `--library-id /vercel/next.js --topic routing`
+- **configuring-better-auth** - OAuth/SSO for Next.js apps
+
 ## References
 
 - [references/nextjs-16-patterns.md](references/nextjs-16-patterns.md) - Complete Next.js 16 patterns
 - [references/frontend-design.md](references/frontend-design.md) - Aesthetic guidelines for distinctive UI
+- [references/datetime-patterns.md](references/datetime-patterns.md) - UTC/timezone handling for datetime-local inputs
