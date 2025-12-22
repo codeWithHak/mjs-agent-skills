@@ -6,10 +6,6 @@
           {
             "type": "command",
             "command": ".claude/hooks/track-prompt.sh"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/skill-activation.sh"
           }
         ]
       }
