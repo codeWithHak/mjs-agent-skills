@@ -1,6 +1,6 @@
 # MJS Skills Library
 
-> 19 agent skills encoding frozen decisions for software engineering workflows.
+> 20 agent skills encoding frozen decisions for software engineering workflows.
 
 ## What Are Skills?
 
@@ -32,7 +32,7 @@ Container and Kubernetes workflows.
 | `operating-k8s-local` | "minikube", "local kubernetes", "kubectl" | Local dev patterns |
 | `deploying-cloud-k8s` | "deploy to AKS/GKE", "CI/CD pipeline" | Build-time vs runtime vars |
 
-### Application (3)
+### Application (4)
 Full-stack application patterns.
 
 | Skill | Trigger | Key Value |
@@ -40,6 +40,7 @@ Full-stack application patterns.
 | `building-nextjs-apps` | "Next.js 16", "async params", "app router" | Breaking changes, proxy.ts |
 | `scaffolding-fastapi-dapr` | "FastAPI service", "Dapr", "microservice" | SQLModel, pub/sub patterns |
 | `configuring-better-auth` | "Better Auth", "OAuth", "SSO" | CORS, email verification |
+| `building-rag-systems` | "RAG", "vector search", "semantic chunking" | Incremental indexing, Qdrant filters |
 
 ### UI/Frontend (4)
 Chat interfaces and styling.
