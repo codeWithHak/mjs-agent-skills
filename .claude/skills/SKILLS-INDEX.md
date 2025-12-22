@@ -143,21 +143,61 @@ Common failures:
 
 ---
 
-## Skill Gaps (Known)
+## Adding New Skills
 
-Areas where skills exist but may lack depth:
+When user throws ideas or skills:
 
-| Skill | Gap | Domain Expert Would Say |
-|-------|-----|-------------------------|
-| `containerizing-applications` | No multi-arch, no security scanning | "Where's Trivy? Distroless images?" |
-| `deploying-cloud-k8s` | No GitOps, no observability | "No ArgoCD? No Prometheus?" |
-| `working-with-spreadsheets` | No pivot tables, no data validation | "This is basic openpyxl" |
+### Evaluation Flow
+
+```
+User submits skill idea
+        │
+        ▼
+┌─────────────────────────────┐
+│ Does Claude already know it? │──YES──► REJECT (not a skill)
+└─────────────────────────────┘
+        │ NO
+        ▼
+┌─────────────────────────────┐
+│ Did it cause production pain?│──YES──► HIGH PRIORITY
+└─────────────────────────────┘
+        │ NO
+        ▼
+┌─────────────────────────────┐
+│ Would expert recreate it?   │──YES──► MEDIUM PRIORITY
+└─────────────────────────────┘
+        │ NO
+        ▼
+      REJECT
+```
+
+### Merge vs New Skill
+
+| Scenario | Action |
+|----------|--------|
+| Extends existing skill domain | Add to existing skill's references/ |
+| New domain, similar trigger | Evaluate collision, pick clearer name |
+| New domain, unique trigger | Create new skill |
+| Overlaps multiple skills | Merge into most relevant, cross-reference |
+
+### Enhancement Checklist
+
+When enhancing existing skills to expert level:
+
+1. **Search for production patterns** - What do experts actually use?
+2. **Create references/*.md** - Deep patterns go here
+3. **Update SKILL.md** - Add summary + link to reference
+4. **Run verify.py** - Must still pass
+
+### Skill Ideas Backlog
 
 Areas with no skills yet:
-- Database migrations at scale
-- API versioning strategies
+- Database migrations at scale (Alembic, Drizzle patterns)
 - Feature flags and gradual rollouts
 - Incident response playbooks
+- Observability instrumentation (OpenTelemetry)
+- GraphQL federation patterns
+- WebSocket scaling patterns
 
 ---
 
