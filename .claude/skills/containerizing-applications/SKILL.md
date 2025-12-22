@@ -3,7 +3,7 @@ name: containerizing-applications
 description: |
   Containerizes applications with Docker, docker-compose, and Helm charts.
   Use when creating Dockerfiles, docker-compose configurations, or Helm charts for Kubernetes.
-  Includes impact analysis, multi-stage builds, and 15+ battle-tested gotchas.
+  Includes Docker Hardened Images (95% fewer CVEs), multi-stage builds, and 15+ battle-tested gotchas.
 ---
 
 # Containerizing Applications
@@ -231,6 +231,37 @@ Use values file instead of `--set` for comma-containing values
 
 ## Production Security
 
+### Docker Hardened Images (Recommended)
+
+**95% fewer CVEs** than community images. Free under Apache 2.0.
+
+```dockerfile
+# BEFORE: Community image with unknown CVEs
+FROM python:3.12-slim
+
+# AFTER: Docker Hardened Image
+FROM docker.io/docker/python:3.12-dhi
+```
+
+**Five Pillars of DHI:**
+| Pillar | What You Get |
+|--------|--------------|
+| Minimal Attack Surface | 98% CVE reduction |
+| 100% Complete SBOM | SPDX/CycloneDX format |
+| SLSA Build Level 3 | Verified provenance |
+| OpenVEX | Machine-readable vuln status |
+| Cosign Signatures | Cryptographic verification |
+
+**Verify signatures:**
+```bash
+cosign verify docker.io/docker/python:3.12-dhi
+```
+
+**Read SBOM:**
+```bash
+docker sbom docker.io/docker/python:3.12-dhi
+```
+
 ### Trivy Scanning (CI/CD)
 
 ```yaml
@@ -238,7 +269,7 @@ Use values file instead of `--set` for comma-containing values
   run: trivy image --severity HIGH,CRITICAL --exit-code 1 ${{ env.IMAGE }}
 ```
 
-### Distroless Images
+### Distroless Images (Alternative)
 
 ```dockerfile
 # Python - use gcr.io/distroless/python3-debian12
