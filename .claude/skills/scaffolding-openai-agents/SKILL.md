@@ -16,8 +16,8 @@ Build production AI agents using OpenAI Agents SDK with native async/await patte
 ```bash
 # Project setup
 mkdir my-agent && cd my-agent
-python -m venv .venv && source .venv/bin/activate
-pip install openai-agents
+uv venv && source .venv/bin/activate
+uv add openai-agents
 
 # Set API key
 export OPENAI_API_KEY=sk-...
